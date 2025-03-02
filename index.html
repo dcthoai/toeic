@@ -16,7 +16,8 @@
 
     .container {
       display: flex;
-      align-items: center;
+      align-items: start;
+      padding-top: 60px;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
@@ -68,6 +69,7 @@
     @media (min-width: 800px) {
       .container {
         padding: 0 16px;
+        padding-top: 0;
       }
 
       #next-page,
@@ -260,16 +262,30 @@
   
     let touchStartX = 0;
     let touchEndX = 0;
-  
+    let isSingleTouch = false;
+
     canvas.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
+      if (e.touches.length === 1) {
+        isSingleTouch = true;
+        touchStartX = e.touches[0].screenX;
+      } else {
+        isSingleTouch = false;
+      }
     });
-  
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length !== 1) {
+        isSingleTouch = false; // Nếu trong lúc di chuyển có thêm ngón tay => huỷ swipe
+      }
+    });
+
     canvas.addEventListener('touchend', (e) => {
+      if (!isSingleTouch) return; // Chỉ xử lý nếu là 1 ngón tay từ đầu đến cuối
+      
       touchEndX = e.changedTouches[0].screenX;
       handleGesture();
     });
-  
+
     function handleGesture() {
       const swipeDistance = touchEndX - touchStartX;
       if (swipeDistance > 50 && pageNum > 7) {
